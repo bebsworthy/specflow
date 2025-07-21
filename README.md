@@ -28,7 +28,7 @@ Fork the repository to customize SpecFlow for your needs, then add it as a subtr
 git subtree add --prefix=.spec https://github.com/YOUR-USERNAME/specflow.git main --squash
 
 # 3. Run the setup script
-cd .spec && ./setup.sh
+.spec/setup.sh
 ```
 
 To update from your fork later:
