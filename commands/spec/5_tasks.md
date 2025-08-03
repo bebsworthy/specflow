@@ -18,18 +18,78 @@ Generate parallel-optimized implementation task list with agent recommendations 
 ## Instructions
 You are working on the tasks phase of the spec workflow, generating tasks optimized for parallel execution with specialized agents.
 
-## Review and Rework Process
+## 🚨 CRITICAL REQUIREMENTS: REVIEW AND REWORK PROCESS 🚨
 
-**MANDATORY**: All development tracks must include Code Review (CR) and Product Review (PR) tasks after implementation:
+**MANDATORY REVIEW LOOP - EVERY TRACK MUST FOLLOW THIS PATTERN:**
 
-1. After each track's development tasks, a **Code Review (CR)** is performed by the appropriate code reviewer agent
-2. Following the code review, a **Product Review (PR)** is performed by the product-owner-reviewer
-3. If either review fails (status: "REQUIRES CHANGES"), a **Rework (RW)** task is triggered
-4. The appropriate developer agent addresses all findings from the failed reviews
-5. After rework, the review process repeats until approval is achieved (status: "APPROVED")
-6. Only after both CR and PR are approved can dependent tracks proceed
+```mermaid
+graph LR
+    DEV[Development Tasks] --> CR[Code Review]
+    CR -->|APPROVED| PR[Product Review]
+    CR -->|REQUIRES CHANGES| RW1[Rework]
+    PR -->|APPROVED| NEXT[Next Track/Done]
+    PR -->|REQUIRES CHANGES| RW2[Rework]
+    RW1 --> CR
+    RW2 --> CR
+    
+    style CR fill:#ffeb3b,stroke:#333,stroke-width:3px
+    style PR fill:#ff9800,stroke:#333,stroke-width:3px
+    style RW1 fill:#f44336,stroke:#333,stroke-width:3px,color:#fff
+    style RW2 fill:#f44336,stroke:#333,stroke-width:3px,color:#fff
+```
 
-**Review Dependencies**: Reviews gate track progression - no dependent tracks can start until all prerequisite reviews are approved.
+### The Review Loop Explained:
+
+1. **Development Phase**: Developer agent completes implementation tasks
+2. **Code Review (CR)**: Technology-specific code reviewer examines the code
+   - **Status: APPROVED** → Proceed to Product Review
+   - **Status: REQUIRES CHANGES** → Trigger Rework (RW) task
+3. **Product Review (PR)**: Product owner validates against requirements
+   - **Status: APPROVED** → Track complete, dependencies can proceed
+   - **Status: REQUIRES CHANGES** → Trigger Rework (RW) task
+4. **Rework (RW)**: Original developer fixes all issues from failed reviews
+   - After rework → Return to Code Review (CR)
+   - **This creates a loop until both reviews pass**
+
+### Key Points:
+- **EVERY track needs CR, PR, and RW tasks** (RW is conditional)
+- **Reviews are BLOCKING** - no dependent work can start until reviews pass
+- **The loop continues** until both CR and PR are approved
+- **Same developer** who wrote the code does the rework
+
+## Review Task Template
+
+**IMPORTANT**: Copy this template for EVERY track in your task list:
+
+```markdown
+- [ ] CR-{TRACK}. **Code Review: {Track Description}**
+  - Review {specific aspects of this track}
+  - Verify {technology-specific checks}
+  - Check {security/performance/best practices}
+  - Ensure {integration points}
+  - _Dependencies: Tasks {list of task numbers}_
+  - _Agent: {technology}-code-reviewer_
+
+- [ ] PR-{TRACK}. **Product Review: Track {TRACK} {Feature}**
+  - Validate {feature} meets requirements {section numbers}
+  - Verify {user-facing functionality}
+  - Check {integration with other features}
+  - Ensure {UI/UX requirements if applicable}
+  - Review output saved to: `{module}/product_review/track-{track}.md`
+  - _Spec References: requirements.md sections {X.x}; design.md {Component}_
+  - _Dependencies: CR-{TRACK}_
+  - _Agent: product-owner-reviewer_
+
+- [ ] RW-{TRACK}. **Rework: Address Track {TRACK} Review Findings**
+  - Review findings from `{module}/code_review/CR-{TRACK}.md` and/or `{module}/product_review/track-{track}.md`
+  - Address all critical issues identified in reviews
+  - Implement required changes and improvements
+  - Re-run tests and validation
+  - Update documentation if needed
+  - _Trigger: Only if CR-{TRACK} or PR-{TRACK} status is "Requires changes"_
+  - _Dependencies: CR-{TRACK} and/or PR-{TRACK} (failed)_
+  - _Agent: {original-developer-agent}_
+```
 
 ### Step 0: Check for --optimize-existing Flag
 
@@ -130,13 +190,31 @@ If `--optimize-existing` flag is provided:
 ```markdown
 # Implementation Tasks
 
-## Review and Rework Process
-1. After each track's development tasks, a **Code Review (CR)** is performed by the {technology}-code-reviewer
-2. Following the code review, a **Product Review (PR)** is performed by the product-owner-reviewer
-3. If either review fails (status: "Requires changes"), a **Rework (RW)** task is triggered
-4. The {technology}-developer addresses all findings from the failed reviews
-5. After rework, the review process repeats until approval is achieved
-6. Only after both CR and PR are approved can dependent tracks proceed
+## 📋 Review Process Checklist
+- [ ] Every development track has CR, PR, and RW tasks
+- [ ] Dependencies correctly block parallel work until reviews pass
+- [ ] Code reviewers match the technology stack
+- [ ] Product reviewer is always product-owner-reviewer
+- [ ] Rework tasks use the same agent as development
+- [ ] Review outputs have specified file paths
+
+## Review and Rework Process (CRITICAL - DO NOT SKIP)
+
+**⚠️ IMPORTANT: This is a LOOP, not a sequence!**
+
+1. After EACH track's development, run Code Review (CR)
+2. If CR fails → Rework → Back to step 1
+3. If CR passes → Run Product Review (PR)
+4. If PR fails → Rework → Back to step 1
+5. Only when BOTH reviews pass can dependent tracks start
+
+**Example Loop for Track B:**
+- Tasks 3-4 complete → CR-B runs
+- CR-B fails → RW-B triggered → Fixes applied → CR-B runs again
+- CR-B passes → PR-B runs
+- PR-B fails → RW-B triggered → Fixes applied → CR-B runs again
+- CR-B passes → PR-B runs again
+- PR-B passes → Track B is complete, Track D can now start
 
 ## Parallel Execution Tracks
 
@@ -488,7 +566,7 @@ When using `--optimize-existing`, the output should look like:
 
 ## Standard Generation Example
 
-For normal task generation (without --optimize-existing):
+**CRITICAL**: This example shows the MANDATORY review loop pattern. Every track in your generated tasks MUST follow this pattern!
 
 ```markdown
 # WebSocket API Implementation Tasks
@@ -497,8 +575,13 @@ For normal task generation (without --optimize-existing):
 - go-developer: Go server development
 - go-websocket-specialist: WebSocket protocol expert
 - go-test-engineer: Go testing specialist
-- go-code-reviewer: Go code review specialist
-- product-owner-reviewer: Product specification compliance specialist
+- go-code-reviewer: Go code review specialist (REQUIRED for all CR tasks)
+- product-owner-reviewer: Product specification compliance specialist (REQUIRED for all PR tasks)
+
+## Review Process Verification ✓
+- [x] Every track has CR, PR, and RW tasks defined
+- [x] Dependencies prevent parallel work until reviews approved
+- [x] Review loops are clearly documented
 
 ## Parallel Execution Tracks
 
@@ -511,36 +594,141 @@ For normal task generation (without --optimize-existing):
   - _Requirements: 1.1_
   - _Agent: go-developer_
 
-### Track B: WebSocket Implementation (Dependencies: Track A)
-> Primary Agent: go-websocket-specialist
+- [ ] 2. **Configure build and development environment**
+  - Set up Makefile with build targets
+  - Configure linting and formatting
+  - _Requirements: 1.2_
+  - _Agent: go-developer_
 
-- [ ] 5. **Implement WebSocket server**
-  - Create WebSocket handler with Gorilla
-  - _Requirements: 2.1_
-  - _Dependencies: Task 1_
-  - _Agent: go-websocket-specialist_
-
-### Review Track
-
-- [ ] CR-A. **Code Review: Foundation Code**
-  - Review project structure and setup
+- [ ] CR-A. **Code Review: Foundation Setup** 🔍
+  - Review project structure and module setup
   - Check Go module configuration and best practices
-  - _Dependencies: Task 1_
+  - Verify build configuration and development tools
+  - Ensure proper package organization
+  - _Dependencies: Tasks 1-2_
   - _Agent: go-code-reviewer_
 
-- [ ] PR-A. **Product Review: Track A Foundation**
-  - Validate foundation meets requirements 1.x
+- [ ] PR-A. **Product Review: Track A Foundation** 📋
+  - Validate foundation meets requirements 1.1, 1.2
+  - Verify development environment setup
+  - Check that project structure supports planned features
+  - Ensure configuration matches specifications
   - Review output saved to: `server/product_review/track-a.md`
-  - _Spec References: requirements.md sections 1.x_
+  - _Spec References: requirements.md sections 1.x; design.md Project Structure_
   - _Dependencies: CR-A_
   - _Agent: product-owner-reviewer_
 
-- [ ] RW-A. **Rework: Address Track A Review Findings**
-  - Fix foundation issues if reviews fail
+- [ ] RW-A. **Rework: Address Track A Review Findings** 🔄
+  - Review findings from `server/code_review/CR-A.md` and/or `server/product_review/track-a.md`
+  - Fix all critical issues identified
+  - Re-run build and validation
+  - Update configuration if needed
+  - **IMPORTANT: After fixes, this returns to CR-A for re-review**
   - _Trigger: Only if CR-A or PR-A status is "Requires changes"_
   - _Dependencies: CR-A and/or PR-A (failed)_
   - _Agent: go-developer_
+
+### Track B: WebSocket Implementation (Dependencies: PR-A approved ✅)
+> Primary Agent: go-websocket-specialist
+> **BLOCKED until Track A reviews are APPROVED**
+
+- [ ] 3. **Implement WebSocket server**
+  - Create WebSocket handler with Gorilla
+  - Set up connection management
+  - _Requirements: 2.1_
+  - _Dependencies: PR-A (approved)_
+  - _Agent: go-websocket-specialist_
+
+- [ ] 4. **Add message routing**
+  - Implement message type handling
+  - Create router for different message types
+  - _Requirements: 2.2_
+  - _Dependencies: Task 3_
+  - _Agent: go-websocket-specialist_
+
+- [ ] CR-B. **Code Review: WebSocket Implementation** 🔍
+  - Review WebSocket server code
+  - Check connection handling and cleanup
+  - Verify message routing implementation
+  - Ensure proper error handling
+  - _Dependencies: Tasks 3-4_
+  - _Agent: go-websocket-specialist_ (specialist can review own domain)
+
+- [ ] PR-B. **Product Review: Track B WebSocket** 📋
+  - Validate WebSocket implementation meets requirements 2.1, 2.2
+  - Verify connection lifecycle management
+  - Check message routing functionality
+  - Test real-time communication flow
+  - Review output saved to: `server/product_review/track-b.md`
+  - _Spec References: requirements.md sections 2.x; design.md WebSocket Architecture_
+  - _Dependencies: CR-B_
+  - _Agent: product-owner-reviewer_
+
+- [ ] RW-B. **Rework: Address Track B Review Findings** 🔄
+  - Review findings from failed reviews
+  - Fix WebSocket implementation issues
+  - Re-test connection handling
+  - Update message routing if needed
+  - **IMPORTANT: Returns to CR-B for re-review**
+  - _Trigger: Only if CR-B or PR-B status is "Requires changes"_
+  - _Dependencies: CR-B and/or PR-B (failed)_
+  - _Agent: go-websocket-specialist_
+
+## Execution Flow Example
+
+**Week 1:**
+1. ▶️ Start Track A development (Tasks 1-2)
+2. ✅ Complete Track A development
+3. 🔍 Run CR-A
+4. ❌ CR-A finds issues
+5. 🔄 Run RW-A to fix issues
+6. 🔍 Run CR-A again
+7. ✅ CR-A passes
+8. 📋 Run PR-A
+9. ❌ PR-A finds requirement mismatches
+10. 🔄 Run RW-A to fix requirements
+11. 🔍 Run CR-A again (must re-review after changes)
+12. ✅ CR-A passes
+13. 📋 Run PR-A again
+14. ✅ PR-A passes
+15. 🎉 Track A complete - Track B can now start!
+
+**Week 2:**
+1. ▶️ Start Track B development (Tasks 3-4)
+2. ... (same review loop pattern)
 ```
+
+## Final Validation Checklist
+
+Before presenting tasks to the user, verify:
+
+1. **Review Coverage** ✓
+   - [ ] Every track has CR, PR, and RW tasks
+   - [ ] No development work without review tasks
+
+2. **Agent Assignment** ✓
+   - [ ] CR tasks use technology-specific reviewers
+   - [ ] PR tasks use product-owner-reviewer
+   - [ ] RW tasks use original developer
+
+3. **Dependencies** ✓
+   - [ ] Reviews block dependent tracks
+   - [ ] RW tasks depend on failed reviews
+   - [ ] Clear progression gates
+
+4. **Review Outputs** ✓
+   - [ ] CR outputs to `{module}/code_review/`
+   - [ ] PR outputs to `{module}/product_review/`
+   - [ ] Clear file paths specified
+
+## Example Task Count
+
+For a typical feature with 3 parallel tracks:
+- Development tasks: 8-12
+- Code Review tasks: 3 (one per track)
+- Product Review tasks: 3 (one per track)
+- Rework tasks: 3 (conditional, one per track)
+- **Total: 17-21 tasks** (with 6-9 being review/quality tasks)
 
 ## Next Phase
 After approval:
@@ -551,3 +739,10 @@ After approval:
 For optimization workflow:
 - Use `/spec:5_tasks {feature-name} --optimize-existing` to optimize partially completed task lists
 - The optimization preserves completed work while improving parallel execution for remaining tasks
+
+## Remember: Reviews Create Loops! 🔄
+
+The review process is iterative. A single track might go through the review loop multiple times:
+- Development → CR (fail) → RW → CR (fail) → RW → CR (pass) → PR (fail) → RW → CR (pass) → PR (pass) → Done!
+
+This ensures quality at every step and is a MANDATORY part of the process.
