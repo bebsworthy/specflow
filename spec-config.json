@@ -12,28 +12,16 @@
     "multi_module_support": true,
     "modules": {
       "server": {
-        "name": "Server",
-        "description": "Backend server and API services",
-        "technology_stack": ["Go", "WebSocket", "REST API"],
-        "directory": "server/",
-        "architecture_file": "documentation/modules/server/architecture.md",
-        "features_directory": "documentation/modules/server/features/"
-      },
-      "frontend-react": {
-        "name": "React Frontend",
-        "description": "React web application frontend",
-        "technology_stack": ["React", "TypeScript", "Tailwind CSS"],
-        "directory": "frontend-react/",
-        "architecture_file": "documentation/modules/frontend-react/architecture.md",
-        "features_directory": "documentation/modules/frontend-react/features/"
-      },
-      "frontend-android": {
-        "name": "Android Frontend",
-        "description": "Android mobile application",
-        "technology_stack": ["Kotlin", "Jetpack Compose", "Room"],
-        "directory": "frontend-android/",
-        "architecture_file": "documentation/modules/frontend-android/architecture.md",
-        "features_directory": "documentation/modules/frontend-android/features/"
+        "name": "mockup_v3",
+        "description": "3rd mockup for Aegis",
+        "technology_stack": [
+          "React",
+          "TypeScript",
+          "Tailwind CSS"
+        ],
+        "directory": "mockup/v3",
+        "architecture_file": "documentation/modules/mockup_v3/architecture.md",
+        "features_directory": "documentation/modules/mockup_v3/features/"
       }
     },
     "cross_module_features": {
