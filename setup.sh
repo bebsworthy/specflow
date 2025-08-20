@@ -129,6 +129,35 @@ setup_documentation() {
     print_success "Created documentation/specs directory"
 }
 
+# Function to setup auditor dependencies
+setup_auditor() {
+    print_info "Setting up auditor dependencies..."
+    
+    # Check if auditor directory exists
+    if [ -d "$SCRIPT_DIR/auditor" ]; then
+        # Save current directory
+        CURRENT_DIR=$(pwd)
+        
+        # Navigate to auditor directory
+        cd "$SCRIPT_DIR/auditor"
+        
+        # Run npm install
+        print_info "Installing auditor dependencies..."
+        if npm install; then
+            print_success "Auditor dependencies installed successfully"
+        else
+            print_error "Failed to install auditor dependencies"
+            cd "$CURRENT_DIR"
+            return 1
+        fi
+        
+        # Return to original directory
+        cd "$CURRENT_DIR"
+    else
+        print_warning "Auditor directory not found at $SCRIPT_DIR/auditor"
+    fi
+}
+
 # Function to show usage
 show_usage() {
     echo "Usage: $0 [claude|gemini|all]"
@@ -182,14 +211,17 @@ main() {
     case $AI_CHOICE in
         claude)
             setup_documentation
+            setup_auditor
             setup_claude
             ;;
         gemini)
             setup_documentation
+            setup_auditor
             setup_gemini
             ;;
         all)
             setup_documentation
+            setup_auditor
             setup_claude
             setup_gemini
             ;;
